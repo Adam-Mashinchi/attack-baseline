@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Merge your Navigator JSON!</title>
+        <meta name="viewport" content="width=device-width"/>
+        <script src="./jquery.js"></script>
+    <body>
+        <h3>Select Multiple Navigator JSON Files!</h3>
+        <input id="up" class='file-upload-button' type="file" multiple />
+        <br />
+        <br />
+        <br />
+        <div>Once done, go <a target="_blank" href="https://mitre-attack.github.io/attack-navigator/">here</a> and "Open Existing Layer" --> "Upload from Local" --> "merged-navigator.json"</div>
+        <!-- the following <a> is a hack to get JSON downloaded -->
+        <a id="downloadJSON" href="#"></a>
+    </body>
+    <script>
+        // Global storage for all survey results
+        var all_user_scores = {};
+
+
+        // Helper function to prompt user for JSON file download
+        function downloadJSON(json_data, file_name) {
+            // Download to file
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json_data));
+            var dlAnchorElem = document.getElementById('downloadJSON');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", file_name + ".json");
+            dlAnchorElem.click();
+        } // downloadJSON
+
+
+        // Helper function to get score averages from array
+        function score_averages(in_array){
+            var total = 0;
+            for(var i = 0; i < in_array.length; i++) {
+                total += in_array[i];
+            }
+            var avg = total / in_array.length;
+            return avg;
+        } // score_averages
+
+
+        // Generates new Navigator layer based on Survey-Results averages
+        function resultsToNavigator(results_json) {
+            // Setup Empty naviagator Layer
+            var navigator_json = false;
+            // Using the "new" clean Navigator JSON
+            $.getJSON("./attack_utils/enterprise_layer.json", function(attack_json) {
+                // Loop each Technique
+                jQuery.each(attack_json['techniques'], function(index, value) {
+                    // Get the results from the Survey files
+                    var results_scores = results_json[attack_json['techniques'][index]["techniqueID"]];
+                    // First, see if there are (valid) scores in array
+                    results_scores = results_scores.filter(function(el) {
+                        return !isNaN(parseFloat(el)) && isFinite(el);
+                    });
+                    // If scores exist, average them ...
+                    if (results_scores.length > 0){
+                        // ... then assign them to "new" JSON
+                        attack_json['techniques'][index]["score"] = score_averages(results_scores);
+                    } // end if results_scores.length
+                }); // end jQuery.each
+                // Assign JSON to variable
+                navigator_json = attack_json;
+            }).done(function(){
+                // Once done, name Navigator layer ...
+                var file_name = "merged-navigator-" + Date.now();
+                navigator_json["name"] = file_name;
+                // ... then download it.
+                downloadJSON(navigator_json, file_name);
+            });
+        } // resultsToNavigator
+
+
+        // Once files added via input ...
+        $("#up").change(function(event){
+            // Create a variable to store all the Survey Results
+            var score_sums = {};
+            // Now parse each input file ...
+            jQuery.each(event.target.files, function(i, val) {
+                // Get the file
+                var uploadedFile = event.target.files[i];
+                // Ensure it is valid JSON
+                if(uploadedFile.type !== "application/json") {
+                    alert("Wrong file type == " + uploadedFile.type);
+                    return false;
+                }
+                // If it is valid ...
+                if (uploadedFile) {
+                    // Read in the JSON
+                    var readFile = new FileReader();
+                    readFile.onload = function(e) {
+                        var contents = e.target.result;
+                        var json = JSON.parse(contents);
+                        // Then, for each Technique ID ...
+                        jQuery.each(json["techniques"], function(index, value) {
+                            // First, see if we have any existing scores, if not, make an empty Array
+                            if(score_sums.hasOwnProperty(json["techniques"][index]["techniqueID"]) == false){
+                                score_sums[json["techniques"][index]["techniqueID"]] = [];
+                            }
+                            // Add the Survey result to the scores array
+                            score_sums[json["techniques"][index]["techniqueID"]].push(json["techniques"][index]["score"]);
+                        }); // end each json["techniques"]
+                    }; // end readFile.onload
+                    readFile.readAsText(uploadedFile);
+                } else {
+                    console.log("Failed to load file");
+                } // end if/else
+            }); // end each event.target.files
+            // Finally, take our results object, and write it to Navigator Layer!
+            resultsToNavigator(score_sums);
+        }); // end #up change
+    </script>
+</html>

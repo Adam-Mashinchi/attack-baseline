@@ -1,0 +1,10 @@
+.sv-root-modern .sv-footer__next-btn, .sv-root-modern .sv-footer__complete-btn {
+    background-color: cornflowerblue !important;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    margin-left: 350px;
+    margin-top: 225px;
+    height: 75px;
+
+}
