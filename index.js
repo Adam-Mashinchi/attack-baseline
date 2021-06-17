@@ -111,7 +111,7 @@ function buildAttackJSON() {
             questions: [
                 {
                     type: "html",
-                    html: "You are about to start a survey about how you feel about all of the ATT&CK Techniques. <br/>You have 10 seconds for every Techinque ID, for you to rate as: Not-Critical, Neutral, or Very-Critical.<br/>Please click on <b>'Start Survey'</b> button when you are ready. (You can 'skip' a question, by clicking 'Next'.)"
+                    html: "You are about to start a survey about how you feel about all of the ATT&CK Techniques. <br/><br/>You have 10 seconds for every Techinque ID, for you to rate as: <em>Not-Critical, Neutral, or Very-Critical</em>.<br/><br/>Please click on <b>'Start Survey'</b> button when you are ready. (You can 'skip' a question, by clicking 'Next'.)"
                 }
             ]
         }],
