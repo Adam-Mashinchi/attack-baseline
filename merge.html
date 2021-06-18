@@ -51,6 +51,10 @@
                 jQuery.each(attack_json['techniques'], function(index, value) {
                     // Get the results from the Survey files
                     var results_scores = results_json[attack_json['techniques'][index]["techniqueID"]];
+                    // Account for missing techniques
+                    if (results_scores == undefined){
+                        results_scores = [];
+                    }
                     // First, see if there are (valid) scores in array
                     results_scores = results_scores.filter(function(el) {
                         return !isNaN(parseFloat(el)) && isFinite(el);
