@@ -46,7 +46,7 @@
             // Setup Empty naviagator Layer
             var navigator_json = false;
             // Using the "new" clean Navigator JSON
-            $.getJSON("./attack_utils/enterprise_layer.json", function(attack_json) {
+            $.getJSON("./attack_utils/enterprise_layer.wsub.json", function(attack_json) {
                 // Loop each Technique
                 jQuery.each(attack_json['techniques'], function(index, value) {
                     // Get the results from the Survey files
